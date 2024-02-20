@@ -40,12 +40,14 @@
 .read-the-docs {
   color: #888;
 }
-input{
+input[type = 'text']{
   font-size: larger;
   height: 40px;
+  width: 100%;
 
 }
 .tasks{
   display: flex;
   justify-content: space-around;
+  justify-items: center;
 }

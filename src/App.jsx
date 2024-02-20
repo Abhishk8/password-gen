@@ -1,71 +1,69 @@
 
-import { useEffect, useState } from 'react';
+import { useState,useCallback,useEffect,useRef} from 'react';
 import './App.css'
+
 
 
 function App() {
 
+  const [length,setLength] = useState(8);
+  const [numberAllowed,setNumberAllowed] = useState(false);
+  const [charAllowed,setCharAllowed] = useState(false);
+
+  const [password,setPassword] = useState("");
+  const passwordRef = useRef(null);
   
-const [list, setList] = useState([
-  {
-  taskname: "hair cut",
-  taskid: 1
-  },
- { taskname: "study",
- taskid: 2
- }
-]);
 
- 
+  const passwordGenerator = useCallback(()=>{
+    let pass = "";
+    let str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-  const [task,setTask] = useState("");
-  const [search,setSearch] = useState("");
-
-  const handletask = (e) => {
-    const newtaks = {
-      taskid: Math.floor(Math.random()*123),
-      taskname:task,
+    if(numberAllowed){
+      str += "0123456789";
     }
-    
-    setList([...list,newtaks]);
-    setTask('');
-    console.log(list);
+    if(charAllowed) str+= "!@#$%^&*()_++{}~`";
 
-    
-  }
-  const handledelete = (id)=>{
-    const result =list.filter((items)=>{
-      return items.taskid !== id;
-    })
-    setList(result);
-  }
+    for(let i = 1; i<=length; i++){
+      let char = Math.floor((Math.random() * str.length +1));
+      pass += str.charAt(char);
+    }
+    setPassword(pass);
 
-  const searchTask = ()=>{
-      list.map((items)=>{
-         if(items.taskname === search) console.log("task found");
-      })
-  }
+  },[length,charAllowed,numberAllowed,setPassword])
 
+  useEffect(()=>{
 
-  return (
-    <>
-      <div>
-        <input type='text' placeholder='Enter tasks' value={task} onChange={(e) => setTask(e.target.value)} />
-        <button type='submit' onClick={handletask}> Add task</button>
-        {list.map((items)=>{
-          return <div id='tasks' key={items.taskid}>  <p>{items.taskname}</p><button onClick={ () =>{handledelete(items.taskid)}}>Delete</button>  </div>
-        })}
-      </div>
+    passwordGenerator()
 
-      <div><h1>Search here</h1>
-      
-      <input type='text' placeholder='task tasks' value={search} onChange={(e) => setSearch(e.target.value)} />
-      <button type='submit' onClick={searchTask}> Search task</button>
-      </div>
+  },[length,numberAllowed,charAllowed,passwordGenerator]);
 
+  const handlecopy = useCallback(()=>{
+    passwordRef.current?.select();
+    passwordRef.current?.setSelectionRange(0,100);
+    window.navigator.clipboard.writeText(password)
+  },[password]);
 
-    </>
-  )
+  return<>
+  <h1>Password Generator</h1>
+
+  <div>
+    <input type='text' value={password} placeholder='password' readOnly ref={passwordRef}></input>
+    <button onClick={handlecopy}>copy</button>
+  </div>
+  <div className='tasks'>
+    <input type="range" min={6}  max={100} value={length} onChange={(e)=>{setLength(e.target.value)}} ></input>
+    <label>length {length}</label>
+  
+  <div>
+    <input type="checkbox" defaultChecked = {numberAllowed} onChange={() => setNumberAllowed((prev) => !prev)} id='numberInput' />
+    <label htmlFor="numberInput">Numbers</label>
+    <input type="checkbox" defaultChecked = {charAllowed} onChange={() => setCharAllowed((prev) => !prev)} id='charInput' />
+    <label htmlFor="charInput">characters</label>
+  </div>
+  </div>
+  
+  </>
+  
 }
 
 export default App;
